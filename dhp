@@ -1,0 +1,62 @@
+#!/usr/bin/env python3
+import os
+import sys
+import subprocess
+
+def run_dhp(file_path):
+    if not file_path.endswith('.dhp'):
+        print("Errore: Il file deve avere estensione .dhp")
+        sys.exit(1)
+
+    if not os.path.isfile(file_path):
+        print(f"Errore: Il file {file_path} non esiste.")
+        sys.exit(1)
+
+    with open(file_path, 'r', encoding='utf-8') as file:
+        dhp_code = file.read()
+
+    if not dhp_code.startswith('<?dhp'):
+        print("Errore: Il file non inizia con <?dhp")
+        sys.exit(1)
+
+    php_code = dhp_code.replace('<?dhp', '<?php').replace('€', '$')
+
+    temp_file = file_path.replace('.dhp', '_temp.php')
+    with open(temp_file, 'w', encoding='utf-8') as file:
+        file.write(php_code)
+
+    try:
+        result = subprocess.run(['php', temp_file], capture_output=True, text=True)
+        print(result.stdout)
+        if result.stderr:
+            print("Errore di esecuzione:", result.stderr, file=sys.stderr)
+    except FileNotFoundError:
+        print("Errore: PHP non è installato o non è configurato nel PATH.")
+        sys.exit(1)
+    finally:
+        if os.path.exists(temp_file):
+            os.remove(temp_file)
+
+def start_server(port):
+    try:
+        subprocess.run(['php', '-S', f'localhost:{port}'], check=True)
+    except FileNotFoundError:
+        print("Errore: PHP non è installato o non è configurato nel PATH.")
+        sys.exit(1)
+    except subprocess.CalledProcessError as e:
+        print(f"Errore durante l'avvio del server: {e}")
+        sys.exit(1)
+
+if __name__ == '__main__':
+    if len(sys.argv) < 2:
+        print("Uso: dhp <file.dhp> | dhp --server <porta>")
+        sys.exit(1)
+
+    if sys.argv[1] == '--server':
+        if len(sys.argv) != 3 or not sys.argv[2].isdigit():
+            print("Errore: Specificare una porta valida per il server.")
+            sys.exit(1)
+        start_server(sys.argv[2])
+    else:
+        dhp_file = sys.argv[1]
+        run_dhp(dhp_file)

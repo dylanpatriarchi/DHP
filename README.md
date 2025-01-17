@@ -1,2 +1,6 @@
 # DHP
-PHP please don't sue me, it's an ironic version of PHP. With DHP you can use PHP with € instead of $
+It's not so hard. 
+
+write some code with .dhp extension and use € instead of $.
+
+For compile&run the code you can do, after you did the instrucion on the file <b>move_dhp.sh</b> <\dhp file_name.dhp or <\dhp file_name.dhp --server 8000>.

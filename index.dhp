@@ -1,0 +1,5 @@
+<?dhp
+€nome = "World";
+€messaggio = "Ciao, €nome!";
+echo €messaggio;
+?>
